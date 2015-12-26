@@ -1,3 +1,4 @@
+#include "common.h"
 #include "string_printf.h"
 
 namespace common {
@@ -42,6 +43,17 @@ int string_vappendf(std::string* output, const char* format, va_list args)
         output->resize(old_size);
     }
     return rc;
+}
+
+int string_appendn(std::string* output, const char* str, size_t len)
+{
+    const int write_point = output->size();
+    int remain = output->capacity() - write_point;
+    
+    len = std::min(remain, (int)len);
+    output->resize(write_point + len);
+    memcpy(&(*output)[write_point], str, len);
+    return 0;
 }
 
 }

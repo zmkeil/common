@@ -13,6 +13,8 @@ int string_appendf(std::string* output, const char* format, ...)
 
 int string_vappendf(std::string* output, const char* format, va_list args);
 
+int string_appendn(std::string* output, const char* str, size_t len);
+
 }
 
 #endif

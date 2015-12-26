@@ -10,5 +10,8 @@ int main()
 
     std::cout << str << std::endl;
 
+    common::string_appendn(&str, "\nworld\nworld", 6);
+    std::cout << str << std::endl;
+
     return 0;
 }

@@ -27,8 +27,7 @@ INCPATH=-I. \
   -I../
 LIBPATH=-L. \
   -L../ \
-  -L/usr/local/lib \
-  -L../common/
+  -L/usr/local/lib
 LDFLAGS=-lcommon -lprotobuf -lpthread -lssl -lcrypto -ldl
 
 
