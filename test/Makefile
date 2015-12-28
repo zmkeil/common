@@ -25,11 +25,11 @@ CPPFLAGS=-g \
 INCPATH=-I. \
   -I./include \
   -I../ \
-  -I/home/zmkeil/software/gtest-1.7.0/include
+  -I../../gtest-1.7.0/include
 LIBPATH=-L. \
   -L../ \
-  -L/usr/local/lib \
-  -L/home/zmkeil/software/gtest-1.7.0/cmake-build
+  -L../../gtest-1.7.0/cmake-build \
+  -L/usr/local/lib
 LDFLAGS=-lcommon -lgtest -lgtest_main -lprotobuf -lpthread -lssl -lcrypto -ldl
 
 

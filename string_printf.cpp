@@ -17,6 +17,7 @@ int string_appendf_impl(std::string& output, const char* format, va_list args)
     } else {
         // bytes_used == remain, but the last char is seted as '\0'
         // by xsnprintf(), see cpptest/str.cpp
+        // this is base platform and Compiler(above is in linux/g++ 4.8
         output.resize(write_point + bytes_used - 1);
     }
     return 0;
