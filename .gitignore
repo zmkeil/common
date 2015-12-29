@@ -1,0 +1,4 @@
+*.o
+*.a
+
+test/test_string_printf

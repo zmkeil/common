@@ -25,10 +25,10 @@ CPPFLAGS=-g \
 INCPATH=-I. \
   -I./include \
   -I../ \
-  -I../../gtest-1.7.0/include
+  -I../../thirdsrc/gtest-1.7.0/include
 LIBPATH=-L. \
   -L../ \
-  -L../../gtest-1.7.0/cmake-build \
+  -L../../thirdsrc/gtest-1.7.0/cmake-build \
   -L/usr/local/lib
 LDFLAGS=-lcommon -lgtest -lgtest_main -lprotobuf -lpthread -lssl -lcrypto -ldl
 
