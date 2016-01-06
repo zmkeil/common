@@ -26,6 +26,7 @@ INCPATH=-I. \
   -I./include \
 
 objs=string_printf.o \
+     network_util.o \
 	 timer.o
 
 .PHONY:all
