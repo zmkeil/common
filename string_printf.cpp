@@ -1,5 +1,4 @@
 #include "common.h"
-#include "string_printf.h"
 
 namespace common {
 

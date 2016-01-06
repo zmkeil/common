@@ -13,5 +13,8 @@ extern "C" {
 #include <vector>
 #include <map>
 #include <string>
+#include "clog.h"
+#include "string_printf.h"
+#include "network_util.h"
 
 #endif
