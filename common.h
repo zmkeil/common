@@ -13,8 +13,11 @@ extern "C" {
 #include <vector>
 #include <map>
 #include <string>
+#include "common_type.h"
 #include "clog.h"
 #include "string_printf.h"
 #include "network_util.h"
+
+extern com_flag_t COMMON_TEST_FLAG;
 
 #endif

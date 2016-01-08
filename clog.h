@@ -8,14 +8,22 @@
   
  **********************************************/
 
+#include "common_type.h"
+
 namespace common {
 
+extern com_flag_t COMMON_TEST_FLAG;
 extern const char* CLOG_TIPS[10];
 
 #define CALERT 0
 #define CWARN 1
 
-#define CLOG(_level_, _fmt_, args...)                    \
-    printf("[%s] "_fmt_, CLOG_TIPS[_level_], ##args)
+// for debug, set COMMON_TEST_FLAG = 1
+#define CLOG(_level_, _fmt_, args...)                       \
+do{                                                         \
+    if (COMMON_TEST_FLAG) {                                 \
+        printf("[%s] "_fmt_, CLOG_TIPS[_level_], ##args);   \
+    }                                                       \
+} while(0)
 
 }
