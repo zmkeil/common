@@ -30,7 +30,7 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
     // set the sockfd in non-blocking
     int flags = fcntl(sockfd, F_GETFL);
     if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK)) {
-        CLOG(CALERT, "fcntl failed with error: %d\n", errno);
+        CLOG(CALERT, "fcntl failed with error: %s\n", strerror(errno));
         return false;
     }
 
@@ -38,14 +38,14 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
         return true;
     }
     if (errno != EINPROGRESS) {
-        CLOG(CALERT, "connect error: %d\n", errno);
+        CLOG(CALERT, "connect error: %s\n", strerror(errno));
         return false;
     }
 
     // reset the flags
     flags = fcntl(sockfd, F_GETFL);
     if (fcntl(sockfd, F_SETFL, flags & ~O_NONBLOCK)) {
-        CLOG(CALERT, "fcntl failed with error: %d\n", errno);
+        CLOG(CALERT, "fcntl failed with error: %s\n", strerror(errno));
         return false;
     }
 
@@ -69,13 +69,13 @@ int send_with_timeout(int sockfd, char* source, size_t size, int timeout)
 {
     struct timeval send_timeout = {timeout, 0};
     if (setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (const char*)&send_timeout, sizeof(send_timeout)) != 0) {
-        CLOG(CALERT, "setscokopt send timeout error: %d\n", errno);
+        CLOG(CALERT, "setscokopt send timeout error: %s\n", strerror(errno));
         return -1;
     }
 
     int ret = send(sockfd, source, size, 0);
     if (ret < 0) {
-        CLOG(CALERT, "send error: %d\n", errno);
+        CLOG(CALERT, "send error: %s\n", strerror(errno));
     }
     return ret;
 }
@@ -84,13 +84,13 @@ int recv_with_timeout(int sockfd, char* dst, size_t size, int timeout)
 {
     struct timeval recv_timeout = {timeout, 0};
     if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&recv_timeout, sizeof(recv_timeout)) != 0) {
-        CLOG(CALERT, "setscokopt recv timeout error: %d\n", errno);
+        CLOG(CALERT, "setscokopt recv timeout error: %s\n", strerror(errno));
         return -1;
     }
 
     int ret = recv(sockfd, dst, size, 0);
     if (ret < 0) {
-        CLOG(CALERT, "recv error: %d\n", errno);
+        CLOG(CALERT, "recv error: %s\n", strerror(errno));
     }
     return ret;
 }
