@@ -7,7 +7,7 @@ namespace common {
 bool sockaddr_init(struct sockaddr_in* addr, socklen_t addr_len, const char* ip, int port)
 {
     if (!addr) {
-        CLOG(CALERT, "addr is null");
+        CLOG(CALERT, "addr is null\n");
         return false;
     }
     bzero(addr, addr_len);
@@ -15,7 +15,7 @@ bool sockaddr_init(struct sockaddr_in* addr, socklen_t addr_len, const char* ip,
     addr->sin_port = htons(port);
     int ret = inet_pton(AF_INET, ip, &addr->sin_addr);
     if (ret <= 0) {
-        CLOG(CALERT, "error ip format \"%s\"", ip);
+        CLOG(CALERT, "error ip format \"%s\"\n", ip);
         return false;
     }
     return true; 
@@ -62,6 +62,7 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
     if(FD_ISSET(sockfd, &write_set)) {
         return true;
     }
+    CLOG(CALERT, "connect timeout\n");
     return false;
 }
 
