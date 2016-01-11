@@ -3,6 +3,8 @@
 
 namespace common {
 
+#define MAX_FD_DESCRIPTOR_VALUE 100
+
 // by default, use AF_INET
 bool sockaddr_init(struct sockaddr_in* addr, socklen_t addr_len, const char* ip, int port)
 {
@@ -58,7 +60,7 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
     // check if the sockfd is ready, select will block timeval
     // the nfds is the max-numbered of all fd-descriptor, if you open many
     // other files before, here will be wrong
-    select(10/*nfds*/, NULL, &write_set, &err_set, &timeval);
+    select(MAX_FD_DESCRIPTOR_VALUE/*nfds*/, NULL, &write_set, &err_set, &timeval);
     if(FD_ISSET(sockfd, &write_set)) {
         return true;
     }

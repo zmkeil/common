@@ -2,7 +2,7 @@
 /***********************************************
   File name		: clog.h
   Create date	: 2016-01-06 19:27
-  Modified date : 2016-01-06 19:28
+  Modified date : 2016-01-11 20:08
   Author		: zmkeil, alibaba.inc
   Express : 
   
@@ -22,7 +22,8 @@ extern const char* CLOG_TIPS[10];
 #define CLOG(_level_, _fmt_, args...)                       \
 do{                                                         \
     if (COMMON_TEST_FLAG) {                                 \
-        printf("[%s] "_fmt_, CLOG_TIPS[_level_], ##args);   \
+        printf("[%s] "                                      \
+                _fmt_, CLOG_TIPS[_level_], ##args);         \
     }                                                       \
 } while(0)
 

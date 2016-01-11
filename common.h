@@ -14,9 +14,11 @@ extern "C" {
 #include <map>
 #include <string>
 #include "common_type.h"
+#include "scope_guard.h"
 #include "clog.h"
 #include "string_printf.h"
 #include "network_util.h"
+#include "pthread_util.h"
 
 extern com_flag_t COMMON_TEST_FLAG;
 

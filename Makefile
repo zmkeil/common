@@ -7,7 +7,8 @@ CXXFLAGS=-g \
   -pipe \
   -W \
   -Wall \
-  -fPIC
+  -fPIC \
+  -std=c++11
 CFLAGS=-g \
   -pipe \
   -W \
@@ -28,6 +29,7 @@ INCPATH=-I. \
 objs=common.o \
 	 string_printf.o \
      network_util.o \
+	 pthread_util.o \
 	 timer.o
 
 .PHONY:all
