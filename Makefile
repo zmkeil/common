@@ -25,7 +25,7 @@ CPPFLAGS=-g \
 #  -Werror 
 INCPATH=-I. \
   -I./include \
-
+  -I../../thirdsrc/gtest-1.7.0/include
 objs=common.o \
 	 string_printf.o \
      network_util.o \

@@ -2,3 +2,4 @@
 *.a
 
 test/test_string_printf
+test/test_network

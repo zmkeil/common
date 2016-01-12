@@ -7,7 +7,8 @@ CXXFLAGS=-g \
   -pipe \
   -W \
   -Wall \
-  -fPIC
+  -fPIC \
+  -std=c++11
 CFLAGS=-g \
   -pipe \
   -W \
@@ -39,9 +40,11 @@ LDFLAGS=-lcommon -lgtest -lgtest_main -lprotobuf -lpthread -lssl -lcrypto -ldl
 
 PROTO=
 
-objs=test_string_printf.o
+objs=test_network.o \
+	 test_string_printf.o
 
-testbin=test_string_printf
+testbin=test_network \
+		test_string_printf
 
 .PHONY:all
 all:pb_c $(testbin)
@@ -82,6 +85,10 @@ pb_c:
 test_string_printf:test_string_printf.o
 	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40m$@[0m']"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBPATH) $^ -o test_string_printf $(LDFLAGS)
+
+test_network:test_network.o
+	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40m$@[0m']"
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBPATH) $^ -o test_network $(LDFLAGS)
 
 # obscure rules
 $(filter %.pb.o,$(objs)): %.o: %.cc

@@ -32,5 +32,7 @@ int send_with_timeout(int sockfd, char* source, size_t size, int timeout);
 
 int recv_with_timeout(int sockfd, char* dst, size_t size, int timeout);
 
+bool is_socket_clear_and_idle(int sockfd); 
+
 }
 #endif

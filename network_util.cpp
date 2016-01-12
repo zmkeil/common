@@ -98,4 +98,35 @@ int recv_with_timeout(int sockfd, char* dst, size_t size, int timeout)
     return ret;
 }
 
+bool is_socket_clear_and_idle(int sockfd)
+{
+    // set the sockfd in non-blocking
+    int flags = fcntl(sockfd, F_GETFL);
+    if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK)) {
+        CLOG(CALERT, "fcntl failed with error: %s\n", strerror(errno));
+        return false;
+    }
+
+	char val;
+	int n = recv(sockfd, &val, 1, 0);
+	
+	if (n == 0) {
+		CLOG(CALERT, "recv fin or rst: %s\n", strerror(errno));
+		return false;
+	}
+
+	if (n == 1) {
+		CLOG(CALERT, "connection filled with data");
+		return false;
+	}
+
+	if (n < 0) {
+		CLOG(CALERT, "errno: %s\n", strerror(errno));
+		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 }
