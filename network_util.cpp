@@ -62,6 +62,8 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
     // other files before, here will be wrong
     select(MAX_FD_DESCRIPTOR_VALUE/*nfds*/, NULL, &write_set, &err_set, &timeval);
     if(FD_ISSET(sockfd, &write_set)) {
+        // TODO: connect error??
+        CLOG(CWARN, "connect done\n");
         return true;
     }
     CLOG(CALERT, "connect timeout\n");
@@ -109,24 +111,28 @@ bool is_socket_clear_and_idle(int sockfd)
 
 	char val;
 	int n = recv(sockfd, &val, 1, 0);
-	
+    bool ret = false;
 	if (n == 0) {
 		CLOG(CALERT, "recv fin or rst: %s\n", strerror(errno));
-		return false;
 	}
-
 	if (n == 1) {
 		CLOG(CALERT, "connection filled with data");
-		return false;
+	}
+	if (n < 0) {
+		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+			ret = true;
+		} else {
+            CLOG(CALERT, "unexpected error: %s\n", strerror(errno));
+        }
 	}
 
-	if (n < 0) {
-		CLOG(CALERT, "errno: %s\n", strerror(errno));
-		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-			return true;
-		}
-	}
-	return false;
+    // reset the flags
+    flags = fcntl(sockfd, F_GETFL);
+    if (fcntl(sockfd, F_SETFL, flags & ~O_NONBLOCK)) {
+        CLOG(CALERT, "fcntl failed with error: %s\n", strerror(errno));
+        return false;
+    }
+	return ret;
 }
 
 }

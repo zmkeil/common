@@ -22,7 +22,7 @@ extern const char* CLOG_TIPS[10];
 #define CLOG(_level_, _fmt_, args...)                       \
 do{                                                         \
     if (COMMON_TEST_FLAG) {                                 \
-        printf("[%s] "                                      \
+        printf("[clog - %s] "                                      \
                 _fmt_, CLOG_TIPS[_level_], ##args);         \
     }                                                       \
 } while(0)
