@@ -24,10 +24,14 @@ int main(int argc, char* argv[])
 	char* ip = argv[1];
 	int port = PORT;
 
-	common::sockaddr_init((struct sockaddr_in*)&servaddr, sizeof(servaddr), ip, port);
+	if (!common::sockaddr_init((struct sockaddr_in*)&servaddr, sizeof(servaddr), ip, port)) {
+		return -1;
+	}
 
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	common::connect_with_timeout(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr), 1);
+	if (!common::connect_with_timeout(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr), 1)) {
+		return -1;
+	}
 
 	while (common::is_socket_clear_and_idle(sockfd)) {
 		std::cout << "establish" << std::endl;
