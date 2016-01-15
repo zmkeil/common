@@ -7,6 +7,7 @@
   Express : 
   
  **********************************************/
+#include <stdlib.h>
 #include <iostream>
 #include "common.h"
 
@@ -14,15 +15,15 @@
 
 int main(int argc, char* argv[])
 {
-	if (argc != 2) {
-		std::cout << "Usage: ./test_network <IP>" << std::endl;
+	if (argc < 2) {
+		std::cout << "Usage: ./test_network IP <port>" << std::endl;
 		exit(-1);
 	}
 	common::COMMON_TEST_FLAG = 1;
 
 	struct sockaddr_in servaddr;
 	char* ip = argv[1];
-	int port = PORT;
+	int port = (argc == 3) ? atoi(argv[2]) : PORT;
 
 	if (!common::sockaddr_init((struct sockaddr_in*)&servaddr, sizeof(servaddr), ip, port)) {
 		return -1;

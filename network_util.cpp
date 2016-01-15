@@ -23,8 +23,19 @@ bool sockaddr_init(struct sockaddr_in* addr, socklen_t addr_len, const char* ip,
     return true; 
 }
 
-// use the traddional set-non-block -- select -- set-back method
-// if you want keep the sockfd as block, use this method
+/*
+ * use the traddional set-non-block -- select -- set-back method
+ * connect with the non-block socket may result in:
+ *  I) the peer don't open this listen port, the behavior is different based on OS. As described below:
+ *     1.return -1, EINPROCESS(wait for SYN-ACK), but then recv RST, then the so_error be setted ECONNREFUSED,
+ *       and select() return immediately with the flag setted. then we must use getsockopt to get SO_ERROR
+ *     2.return -1, EINPROCESS(wait for SYN-ACK), the peer just drop it. then select() return when timeout
+ *       without setted flag
+ *  II) the peer host don't exist
+ *     1.return -1, ENETUNREACH(this is guaranteed by lower protocol)
+ *
+ * the SO_ERROR, refer to http://blog.csdn.net/woowenjie/article/details/5235976
+ */
 bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len, int timeout)
 {
     struct timeval timeval = {timeout, 0};
@@ -46,14 +57,6 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
         return false;
     }
 
-    // reset the flags
-    flags = fcntl(sockfd, F_GETFL);
-    if (fcntl(sockfd, F_SETFL, flags & ~O_NONBLOCK)) {
-        CLOG(CALERT, "connect error: fcntl failed %s\n", strerror(errno));
-		close(sockfd);
-        return false;
-    }
-
     fd_set write_set, err_set;
     FD_ZERO(&write_set);
     FD_ZERO(&err_set);
@@ -64,12 +67,42 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
     // the nfds is the max-numbered of all fd-descriptor, if you open many
     // other files before, here will be wrong
     select(MAX_FD_DESCRIPTOR_VALUE/*nfds*/, NULL, &write_set, &err_set, &timeval);
+	bool ret = true;
     if(FD_ISSET(sockfd, &write_set)) {
-        return true;
+		// check the SO_ERROR, whether recv RST or other errors
+		int optval;
+		socklen_t optval_len = sizeof(int);
+		getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&optval, &optval_len);
+		switch (optval) {
+			case 0:
+				break;
+			case ECONNREFUSED:
+			case ECONNRESET:
+				CLOG(CALERT, "connect error: %s\n", strerror(optval));
+				ret = false;
+				break;
+			default:
+				CLOG(CALERT, "connect error: %s\n", strerror(optval));
+				ret = false;
+				break;
+		}
+    } else {
+		CLOG(CALERT, "connect error: timeout\n");
+		ret = false;
+	}
+
+    // reset the flags
+    flags = fcntl(sockfd, F_GETFL);
+    if (fcntl(sockfd, F_SETFL, flags & ~O_NONBLOCK)) {
+        CLOG(CALERT, "connect error: fcntl failed %s\n", strerror(errno));
+        ret = false;
     }
-    CLOG(CALERT, "connect error: timeout\n");
-	close(sockfd);
-    return false;
+
+	// if error, close the sockfd
+	if (!ret) {
+		close(sockfd);
+	}
+    return ret;
 }
 
 int send_with_timeout(int sockfd, char* source, size_t size, int timeout)
@@ -124,6 +157,7 @@ bool is_socket_clear_and_idle(int sockfd)
 		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
 			ret = true;
 		} else {
+			// ECONNRESET
             CLOG(CALERT, "check clear note: unexpected state %s\n", strerror(errno));
         }
 	}
