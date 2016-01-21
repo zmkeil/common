@@ -24,19 +24,14 @@ CPPFLAGS=-g \
   -D__const__=
 #  -Werror 
 INCPATH=-I. \
-  -I./include \
+  -I../ \
   -I../../thirdsrc/gtest-1.7.0/include
-
-comlog_objs=comlog/stderr_log.o \
-			comlog/info_log_context.o
-
-objs=string_printf.o \
-     network_util.o \
-	 pthread_util.o \
-	 timer.o
+objs=stderr_log.o \
+	 empty_log.o \
+     info_log_context.o
 
 .PHONY:all
-all:libcommon.a UT
+all:$(objs) test
 	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40mall[0m']"
 	@echo "make all done"
 
@@ -44,31 +39,21 @@ all:libcommon.a UT
 clean:
 	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40mclean[0m']"
 	rm -rf $(objs)
-	make -C comlog clean
-	rm -rf libcommon.a
-	make -C test clean
+	rm -rf test_info_log_context
 
 .PHONY:love
 love:
 	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40mlove[0m']"
 	@echo "make love done"
 
-libcommon.a:$(objs) $(comlog_objs)
-	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40mlibcommon.a[0m']"
-	ar rcs libcommon.a $(objs) $(comlog_objs)
-
 $(objs): %.o: %.cpp
 	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40m$@[0m']"
 	$(CXX) -c $(INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o $@ $<
 
-$(comlog_objs):
-	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40mcomlog_objs[0m']"
-	make -C comlog
+test:test_info_log_context.cpp $(objs)
+	@echo "[[1;32;40mbuild test_info_log_context[0m]"
+	$(CXX) $(INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o test_info_log_context $^ ../timer.o ../string_printf.o
 
-# UT
-UT:
-	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40mtest[0m']"
-	make -C test all
 
 endif #ifeq ($(shell uname -m),x86_64)
 

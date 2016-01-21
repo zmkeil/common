@@ -1,5 +1,8 @@
 *.o
 *.a
 
+comlog/test_info_log_context
+
 test/test_string_printf
 test/test_network
+test/test_timer

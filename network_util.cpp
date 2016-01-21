@@ -1,5 +1,6 @@
 
-#include "common.h"
+#include "comlog/info_log_context.h"
+#include "network_util.h"
 
 namespace common {
 
@@ -9,7 +10,7 @@ namespace common {
 bool sockaddr_init(struct sockaddr_in* addr, socklen_t addr_len, const char* ip, int port)
 {
     if (!addr) {
-        CLOG(CALERT, "sockaddr init error: addr is null\n");
+        LOG(ALERT, "sockaddr init error: addr is null");
         return false;
     }
     bzero(addr, addr_len);
@@ -17,7 +18,7 @@ bool sockaddr_init(struct sockaddr_in* addr, socklen_t addr_len, const char* ip,
     addr->sin_port = htons(port);
     int ret = inet_pton(AF_INET, ip, &addr->sin_addr);
     if (ret <= 0) {
-        CLOG(CALERT, "sockaddr init error: wrong ip format \"%s\"\n", ip);
+        LOG(ALERT, "sockaddr init error: wrong ip format \"%s\"", ip);
         return false;
     }
     return true; 
@@ -43,7 +44,7 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
     // set the sockfd in non-blocking
     int flags = fcntl(sockfd, F_GETFL);
     if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK)) {
-        CLOG(CALERT, "connect error: fcntl failed %s\n", strerror(errno));
+        LOG(ALERT, "connect error: fcntl failed %s", strerror(errno));
 		close(sockfd);
         return false;
     }
@@ -52,7 +53,7 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
         return true;
     }
     if (errno != EINPROGRESS) {
-        CLOG(CALERT, "connect error: %s\n", strerror(errno));
+        LOG(ALERT, "connect error: %s", strerror(errno));
 		close(sockfd);
         return false;
     }
@@ -78,23 +79,23 @@ bool connect_with_timeout(int sockfd, struct sockaddr* addr, socklen_t addr_len,
 				break;
 			case ECONNREFUSED:
 			case ECONNRESET:
-				CLOG(CALERT, "connect error: %s\n", strerror(optval));
+				LOG(ALERT, "connect error: %s", strerror(optval));
 				ret = false;
 				break;
 			default:
-				CLOG(CALERT, "connect error: %s\n", strerror(optval));
+				LOG(ALERT, "connect error: %s", strerror(optval));
 				ret = false;
 				break;
 		}
     } else {
-		CLOG(CALERT, "connect error: timeout\n");
+		LOG(ALERT, "connect error: timeout");
 		ret = false;
 	}
 
     // reset the flags
     flags = fcntl(sockfd, F_GETFL);
     if (fcntl(sockfd, F_SETFL, flags & ~O_NONBLOCK)) {
-        CLOG(CALERT, "connect error: fcntl failed %s\n", strerror(errno));
+        LOG(ALERT, "connect error: fcntl failed %s", strerror(errno));
         ret = false;
     }
 
@@ -109,13 +110,13 @@ int send_with_timeout(int sockfd, char* source, size_t size, int timeout)
 {
     struct timeval send_timeout = {timeout, 0};
     if (setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (const char*)&send_timeout, sizeof(send_timeout)) != 0) {
-        CLOG(CALERT, "send error: setscokopt timeout failed %s\n", strerror(errno));
+        LOG(ALERT, "send error: setscokopt timeout failed %s", strerror(errno));
         return -1;
     }
 
     int ret = send(sockfd, source, size, 0);
     if (ret < 0) {
-        CLOG(CALERT, "send error: %s\n", strerror(errno));
+        LOG(ALERT, "send error: %s", strerror(errno));
     }
     return ret;
 }
@@ -124,13 +125,13 @@ int recv_with_timeout(int sockfd, char* dst, size_t size, int timeout)
 {
     struct timeval recv_timeout = {timeout, 0};
     if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&recv_timeout, sizeof(recv_timeout)) != 0) {
-        CLOG(CALERT, "recv error: setscokopt timeout failed %s\n", strerror(errno));
+        LOG(ALERT, "recv error: setscokopt timeout failed %s", strerror(errno));
         return -1;
     }
 
     int ret = recv(sockfd, dst, size, 0);
     if (ret < 0) {
-        CLOG(CALERT, "recv error: %s\n", strerror(errno));
+        LOG(ALERT, "recv error: %s", strerror(errno));
     }
     return ret;
 }
@@ -140,7 +141,7 @@ bool is_socket_clear_and_idle(int sockfd)
     // set the sockfd in non-blocking
     int flags = fcntl(sockfd, F_GETFL);
     if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK)) {
-        CLOG(CALERT, "check clear error: fcntl failed %s\n", strerror(errno));
+        LOG(ALERT, "check clear error: fcntl failed %s", strerror(errno));
         return false;
     }
 
@@ -148,24 +149,24 @@ bool is_socket_clear_and_idle(int sockfd)
 	int n = recv(sockfd, &val, 1, 0);
     bool ret = false;
 	if (n == 0) {
-		CLOG(CALERT, "check clear note: recv fin or rst\n");
+		LOG(ALERT, "check clear note: recv fin or rst");
 	}
 	if (n == 1) {
-		CLOG(CALERT, "check clear note: connection filled with data\n");
+		LOG(ALERT, "check clear note: connection filled with data");
 	}
 	if (n < 0) {
 		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
 			ret = true;
 		} else {
 			// ECONNRESET
-            CLOG(CALERT, "check clear note: unexpected state %s\n", strerror(errno));
+            LOG(ALERT, "check clear note: unexpected state %s", strerror(errno));
         }
 	}
 
     // reset the flags
     flags = fcntl(sockfd, F_GETFL);
     if (fcntl(sockfd, F_SETFL, flags & ~O_NONBLOCK)) {
-        CLOG(CALERT, "check clear error: fcntl failed %s\n", strerror(errno));
+        LOG(ALERT, "check clear error: fcntl failed %s", strerror(errno));
         return false;
     }
 	return ret;

@@ -1,4 +1,7 @@
-#include "common.h"
+#include <stdio.h>
+#include <string.h>
+#include <string>
+#include "string_printf.h"
 
 namespace common {
 

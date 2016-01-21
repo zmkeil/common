@@ -6,6 +6,7 @@ extern "C" {
 #include "string.h"
 }
 #include "scope_guard.h"
+#include "comlog/info_log_context.h"
 
 namespace common {
 
@@ -18,7 +19,7 @@ R run_with_pthread_mutex(pthread_mutex_t *mutex, R (*func)())
     auto mutex_scope = common::makeScopeGuard(
         [&mutex] () {
             if (pthread_mutex_lock(mutex) != 0) {
-                CLOG(CALERT, "lock mutex error: %s", strerror(errno));
+                LOG(ALERT, "lock mutex error: %s", strerror(errno));
                 pthread_exit((void*)"get mutex error");
             }
         },
@@ -33,7 +34,7 @@ R run_with_pthread_mutex(pthread_mutex_t *mutex, R (*func)(Arg1), Arg1 arg1)
     auto mutex_scope = common::makeScopeGuard(
         [&mutex] () {
             if (pthread_mutex_lock(mutex) != 0) {
-                CLOG(CALERT, "lock mutex error: %s", strerror(errno));
+                LOG(ALERT, "lock mutex error: %s", strerror(errno));
                 pthread_exit((void*)"get mutex error");
             }
         },
@@ -48,7 +49,7 @@ R run_with_pthread_mutex(pthread_mutex_t *mutex, R (*func)(Arg1, Arg2), Arg1 arg
     auto mutex_scope = common::makeScopeGuard(
         [&mutex] () {
             if (pthread_mutex_lock(mutex) != 0) {
-                CLOG(CALERT, "lock mutex error: %s", strerror(errno));
+                LOG(ALERT, "lock mutex error: %s", strerror(errno));
                 pthread_exit((void*)"get mutex error");
             }
         },

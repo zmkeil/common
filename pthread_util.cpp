@@ -8,7 +8,6 @@
   
  **********************************************/
 
-#include "clog.h"
 #include "pthread_util.h"
 
 namespace common {
@@ -18,7 +17,7 @@ ScopeGuard make_mutex_guard(pthread_mutex_t* mutex)
     return common::makeScopeGuard(
         [&mutex] () {
             if (pthread_mutex_lock(mutex) != 0) {
-                CLOG(CALERT, "lock mutex error: %s", strerror(errno));
+                LOG(ALERT, "lock mutex error: %s", strerror(errno));
                 pthread_exit((void*)"get mutex error");
             }
         },

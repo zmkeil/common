@@ -41,10 +41,12 @@ LDFLAGS=-lcommon -lgtest -lgtest_main -lprotobuf -lpthread -lssl -lcrypto -ldl
 PROTO=
 
 objs=test_network.o \
-	 test_string_printf.o
+	 test_string_printf.o \
+	 test_timer.o
 
 testbin=test_network \
-		test_string_printf
+		test_string_printf \
+		test_timer
 
 .PHONY:all
 all:pb_c $(testbin)
@@ -89,6 +91,10 @@ test_string_printf:test_string_printf.o
 test_network:test_network.o
 	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40m$@[0m']"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBPATH) $^ -o test_network $(LDFLAGS)
+
+test_timer:test_timer.o
+	@echo "[[1;32;40mCOMAKE:BUILD[0m][Target:'[1;32;40m$@[0m']"
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBPATH) $^ -o test_timer $(LDFLAGS)
 
 # obscure rules
 $(filter %.pb.o,$(objs)): %.o: %.cc

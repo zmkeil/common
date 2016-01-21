@@ -2,14 +2,14 @@
 /***********************************************
   File name		: test_network.cpp
   Create date	: 2016-01-12 17:10
-  Modified date : 2016-01-12 17:14
+  Modified date : 2016-01-21 16:17
   Author		: zmkeil, alibaba.inc
   Express : 
   
  **********************************************/
 #include <stdlib.h>
 #include <iostream>
-#include "common.h"
+#include "network_util.h"
 
 #define PORT 8899
 
@@ -19,7 +19,6 @@ int main(int argc, char* argv[])
 		std::cout << "Usage: ./test_network IP <port>" << std::endl;
 		exit(-1);
 	}
-	common::COMMON_TEST_FLAG = 1;
 
 	struct sockaddr_in servaddr;
 	char* ip = argv[1];
