@@ -28,7 +28,9 @@ INCPATH=-I. \
   -I../../thirdsrc/gtest-1.7.0/include
 
 comlog_objs=comlog/stderr_log.o \
-			comlog/info_log_context.o
+			comlog/info_log_context.o \
+            io/iobuf.o \
+            io/iobuf_zero_copy_stream.o
 
 objs=string_printf.o \
      network_util.o \

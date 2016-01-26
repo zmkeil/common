@@ -35,7 +35,7 @@ public:
 	static void set_log(AbstractLog* log) {
 		if (!log) {
 			fprintf(stderr, "InfoLogContext::set_log(NULL)");
-			exit(-1);
+			return;
 		}
 		get_context()->_log = log;
 	}

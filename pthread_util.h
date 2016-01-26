@@ -4,6 +4,7 @@
 extern "C" {
 #include "pthread.h"
 #include "string.h"
+#include "errno.h"
 }
 #include "scope_guard.h"
 #include "comlog/info_log_context.h"

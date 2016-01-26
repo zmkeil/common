@@ -12,7 +12,7 @@
 #ifndef COMMON_LOG_STDERR_LOG_H
 #define COMMON_LOG_STDERR_LOG_H
 
-#include "timer.h"
+#include "../timer.h"
 #include "abstract_log.h"
 
 namespace common {
@@ -22,10 +22,10 @@ class StderrLog : public AbstractLog
 public:
 	StderrLog(int level) : AbstractLog(level) {
 		// the default time_handler, return a char pointer
-		_time_handler = &asctime;
+		_time_handler = &common::asctime;
 	}
 	StderrLog() : AbstractLog(DEBUG) {
-		_time_handler = &asctime;
+		_time_handler = &common::asctime;
 	}
 
 	virtual ~StderrLog() {}
