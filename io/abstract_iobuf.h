@@ -17,11 +17,11 @@ class AbstractIOBuf
 public:
     AbstractIOBuf(size_t block_size) :
 			_block_size(block_size),
-			_bytes(0),
 			_blocks(0),
 			_read_block(0),
 			_read_point(nullptr),
-			_is_read_point_cached(false)
+			_is_read_point_cached(false),
+			_bytes(0)
 	{
 	}
 
@@ -193,24 +193,43 @@ public:
     virtual void print_info(size_t capacity) = 0;
 
 protected:
+    // three point:
+    //   1.init the pool struct
+    //   2.malloc the first block, and you could also malloc severy blocks
+    //     set _blocks as 1
+    //   3.set the _read_point at the start of first block
+    //   4.set the current_read_block(based on implement) to the first block
 	virtual bool init_pool() = 0;
-
+    // two point:
+    //   1.get a new block, and _blocks++
+    //   2.move the current_block(based on implement) to the new block
 	virtual bool alloc_next_block() = 0;
+    // check if the current block has buf GE size
 	virtual bool is_current_block_buf_enough(size_t size, IOBufAllocType type) = 0;
+    // just calculate current block's remained buf size, zero or a positive
 	virtual size_t current_block_remain_buf_size() = 0;
+    // just calculate current block's alloced buf size
 	virtual size_t current_block_alloc_buf_size() = 0;
+    // alloc n bytes from current block, Don't need to consider security
 	virtual char* alloc_from_current_block(size_t n) = 0;
+    // reclaim n bytes to current block, Don't need to consider security
 	virtual bool reclaim_to_current_block(size_t n) = 0;
 
+    // two point:
+    //   1.move _read_point to next block
+    //   2._read_block++
 	virtual void move_read_point_to_next_block() = 0;
+    // just calculate current block's remain data size, zero or a positive
+    // don't need to consider _bytes
 	virtual size_t current_block_remain_data_size() = 0;
+    // just calculate current block's consume data size
 	virtual size_t current_block_consume_data_size() = 0;
 
 protected:
     size_t _block_size;
-    size_t _bytes;
-    int _blocks/*LE MAX_BLOCKS_NUM*/;
-    int _read_block;
+    // _blocks, _read_block, _read_point is operated in protected method
+    int _blocks/*count*/;
+    int _read_block/*index: 0 ~ xx*/;
     char* _read_point;
 
 	/* for cut and carrayon */
@@ -221,6 +240,9 @@ protected:
 	char* _read_point_record;
 	int _read_block_record;
 	bool _is_read_point_cached;
+
+private:
+    size_t _bytes;
 };
 
 }
