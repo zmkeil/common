@@ -2,6 +2,7 @@
 #define COMMON_IO_ABSTRACT_IOBUF_H
 
 #include <stdio.h>
+#include <string.h>
 #include <string>
 #include "comlog/info_log_context.h"
 
@@ -12,7 +13,7 @@ enum IOBufAllocType {
 	IOBUF_ALLOC_SIMILAR
 };
 
-class AbstractIOBuf 
+class AbstractIOBuf
 {
 public:
     AbstractIOBuf(size_t block_size) :
@@ -20,8 +21,8 @@ public:
 			_blocks(0),
 			_read_block(0),
 			_read_point(nullptr),
-			_is_read_point_cached(false),
-			_bytes(0)
+			_bytes(0),
+			_is_read_point_cached(false)
 	{
 	}
 
@@ -83,8 +84,8 @@ public:
 	// in such condition, move _read_point to next block
     int read(const char** data)
 	{
-		if (!_read_point) {
-			LOG(ALERT, "no more data in zero_copy_input_stream");
+		if (!_read_point || (_bytes == 0)) {
+			LOG(INFO, "no more data in zero_copy_input_stream");
 			return -1;
 		}
 
@@ -183,8 +184,50 @@ public:
 	}
 
 /* store and resume the read point at one time */
-	virtual void read_point_cache() = 0;
-	virtual bool read_point_resume() = 0;
+    void read_point_cache()
+    {
+    	_read_point_record = _read_point;
+        _read_block_record = _read_block;
+    	_bytes_record = _bytes;
+    	_is_read_point_cached = true;
+    }
+
+    bool read_point_resume()
+    {
+    	if (!_is_read_point_cached) {
+    		LOG(ALERT, "read point not cached");
+    		return false;
+    	}
+    	// first release all current data
+    	release_all();
+    	// then copy the origin data to new point, we can't simplly reclaim because that several
+    	// alloc/read operation may be called after last read_point_cache()
+    	// this will be a continuely malloc buf.
+    	char* read_point_new = NULL;
+        int read_block_new = _blocks - 1;
+    	if (alloc(&read_point_new, _bytes_record, IOBUF_ALLOC_EXACT) != (int)_bytes_record) {
+    		LOG(ALERT, "alloc _bytes_record buf failed");
+    		return false;
+    	}
+    	// resume the last cache scene
+    	_read_point = _read_point_record;
+        _read_block = _read_block_record;
+    	_bytes = _bytes_record;
+    	// copy data
+        char* tmp_buf = read_point_new;
+    	while (_bytes > 0) {
+    		const char* read_buf = NULL;
+    		int read_len = read(&read_buf);
+    		memcpy(tmp_buf, read_buf, read_len);
+            tmp_buf += read_len;
+    	}
+    	// set the new scene
+    	_read_point = read_point_new;
+        _read_block = read_block_new;
+    	_bytes = _bytes_record;
+    	_is_read_point_cached = false;
+    	return true;
+    }
 
 /* dump and print the infomation or payload */
     virtual void dump_payload(std::string* payload) = 0;
@@ -196,13 +239,15 @@ protected:
     // three point:
     //   1.init the pool struct
     //   2.malloc the first block, and you could also malloc severy blocks
-    //     set _blocks as 1
-    //   3.set the _read_point at the start of first block
-    //   4.set the current_read_block(based on implement) to the first block
+    //     set _blocks = 1
+    //   3.set _read_block = _block - 1
+    //   4.set the _read_point at the start of first block
 	virtual bool init_pool() = 0;
     // two point:
-    //   1.get a new block, and _blocks++
-    //   2.move the current_block(based on implement) to the new block
+    //   1.get a new block,
+    //   2._blocks++
+    //   3.some additional operation such as NgxplusIOBuf's _pool->current moving
+    //     this is just for Convenience, commonly it can be got with _blocks
 	virtual bool alloc_next_block() = 0;
     // check if the current block has buf GE size
 	virtual bool is_current_block_buf_enough(size_t size, IOBufAllocType type) = 0;
@@ -217,7 +262,8 @@ protected:
 
     // two point:
     //   1.move _read_point to next block
-    //   2._read_block++
+    //   2._read_block++, the current_read_block cat be got with _read_block in
+    //     all implements (include NgxplusIOBuf)
 	virtual void move_read_point_to_next_block() = 0;
     // just calculate current block's remain data size, zero or a positive
     // don't need to consider _bytes
@@ -232,6 +278,8 @@ protected:
     int _read_block/*index: 0 ~ xx*/;
     char* _read_point;
 
+private:
+    size_t _bytes;
 	/* for cut and carrayon */
     size_t _cut_remain_bytes;
 
@@ -240,9 +288,6 @@ protected:
 	char* _read_point_record;
 	int _read_block_record;
 	bool _is_read_point_cached;
-
-private:
-    size_t _bytes;
 };
 
 }

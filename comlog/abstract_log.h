@@ -25,27 +25,47 @@ namespace common {
 #define INFO        6
 #define DEBUG       7
 
-class AbstractLog 
+class AbstractLog
 {
 public:
 	AbstractLog() : _level(DEBUG) {}
 	AbstractLog(int level) : _level(level) {}
 
-    void comlog_write(int level, const char* fmt, va_list args) 
+    void comlog_write(int level, const char* fmt, va_list args)
 	{
 		if (level <= _level) {
 			comlog_write_core(level, fmt, args);
-		} 
+		}
 		return;
 	}
 
-    virtual void comlog_write_core(int level, const char* fmt, va_list args) = 0;
+    void comlog_write(int level, const char* fmt, ...)
+	{
+		if (level <= _level) {
+            va_list args;
+            va_start(args, fmt);
+			comlog_write_core(level, fmt, args);
+            va_end(args);
+		}
+		return;
+	}
+
+    virtual void set_level(int level)
+    {
+        _level = level;
+    }
+
+    virtual void set_time_handler(char* (*handler)())
+    {
+        _time_handler = handler;
+    }
 
 protected:
 	// every line of log will print the level
     int _level;
 	// If it isn't null, print the time
 	char* (*_time_handler)();
+    virtual void comlog_write_core(int level, const char* fmt, va_list args) = 0;
 };
 
 } // ngxplus

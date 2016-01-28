@@ -30,6 +30,7 @@ public:
 
 	virtual ~StderrLog() {}
 
+protected:
     void comlog_write_core(int level, const char* fmt, va_list args);
 };
 
