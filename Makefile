@@ -36,6 +36,7 @@ io_objs=io/iobuf.o \
 objs=string_printf.o \
      network_util.o \
 	 pthread_util.o \
+	 protobuf_util.o \
 	 timer.o
 
 .PHONY:all
