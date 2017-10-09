@@ -73,10 +73,16 @@ public:
 			LOG(ALERT, "reclaim count GT current block alloc buf size");
 			return false;
 		}
-		reclaim_to_current_block(count);
+        reclaim_to_current_block(count);
 		_bytes -= count;
 		return true;
 	}
+
+    // used for alloc mem for socket read
+    bool rebyte(int d_count) {
+        _bytes += d_count;
+        return true;
+    }
 
 /* For output */
 	// get data from current block
